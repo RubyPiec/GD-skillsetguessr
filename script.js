@@ -48,7 +48,9 @@ async function fetchGDDLLevels(){
 
 let currentRound = 0;
 let levelList;
+
 let pointsperRound = Array(5)
+let totalpoints = 0;
 
 let GDDLSkillsetSel
 
@@ -58,7 +60,7 @@ async function getRound(roundnum){ // WE ARE INDEXING AT **0**. ZERO IS THE FIRS
         levelList = levelList.concat(newBatch)
     }
     console.log(levelList[roundnum])
-    document.getElementById('ytvid').src = `https://www.youtube.com/embed/${levelList[roundnum]["Showcase"]}?autoplay=1`
+    document.getElementById('ytvid').src = `https://www.youtube.com/embed/${levelList[roundnum]["Showcase"]}?autoplay=1&enablejsapi=1`
 }
 
 async function startGame(){
@@ -88,7 +90,7 @@ async function startGame(){
             },
             allowEmptyOption: true,
             maxItems: 7,
-            onChange: function(){GDDLSkillsetSel.setTextboxValue()}
+            onChange: function(){GDDLSkillsetSel.setTextboxValue(); GDDLSkillsetSel.close()}
         });
 
 
@@ -118,6 +120,8 @@ async function startGame(){
     }
 }
 
+let skillsetsPerLevel = Array(5)
+
 async function calculateGDDLPoints(roundNum, diffGuess, skillsetGuess){
     let levelID = levelList[roundNum]["ID"]
     let response = await fetch('https://skillsetguessr.rubypiec.workers.dev/?site=gddl&url='+encodeURIComponent('level/')+levelID+encodeURIComponent('/tags'));
@@ -138,6 +142,8 @@ async function calculateGDDLPoints(roundNum, diffGuess, skillsetGuess){
         totalSkillsetVotes+=i.ReactCount
     }
 
+    skillsetsPerLevel[roundNum] = skillsets
+
     let relevantSkillsets = skillsets.slice(0,7).filter(skillset => skillset.ReactCount > 0.2*highestSkillsetVotes) //only skillsets with a decent majority (20%), and also only the first 7
     let relevantSkillsetNames = relevantSkillsets.map(skillset => skillset.Tag.Name)
 
@@ -148,9 +154,11 @@ async function calculateGDDLPoints(roundNum, diffGuess, skillsetGuess){
     console.log(relevantSkillsets)
 
     let totalRelevantVotes = 0;
-    for(i of relevantSkillsets){ // This is so poorly coded LMAOOo
+    for(i of relevantSkillsets){ // This is so poorly coded LMAOOo // i barely fucking know what i was doing tbh
         totalRelevantVotes+=i.ReactCount
     }
+
+    let multiplier = 1 //used for bad guess
 
     for(let i of skillsetGuess){
         let positionInSkillsets = skillsetNames.indexOf(i)
@@ -165,29 +173,93 @@ async function calculateGDDLPoints(roundNum, diffGuess, skillsetGuess){
                     console.log('kinda irrelevant but ok ' + i) // If it is, no worries!
                 } else{
                     // BAD GUESS
-                    console.log(i + ' nuh uh. -750')
-                    points -= 750
+                    console.log(i + ' nuh uh. -10%')
+                    multiplier *= 0.9
                 }
             }
         } else{
-            console.log(i + ' nuh uh. -750')
-            points -= 750
+            console.log(i + ' nuh uh. -20%')
+            multiplier *= 0.8
         }
     }
 
-    return points;
+    return points*multiplier;
 }
 
+let skillsetGuessesPerRound = Array(5)
+
+async function openRecap(roundnumber){
+    document.getElementById('recappoints').innerHTML = `+${Math.round(pointsperRound[roundnumber])}/5000 points`
+
+    document.getElementById('skillsetlist').innerHTML = ''
+
+    let maxSkillset = skillsetsPerLevel[roundnumber][0].ReactCount
+    for(let i of skillsetsPerLevel[roundnumber]){
+        let skillset = document.createElement('span') 
+        skillset.innerHTML = i.Tag.Name
+        skillset.classList.add('skillsettype')
+        let rarity = i.ReactCount
+
+        document.getElementById('levelName').innerHTML = `${levelList[roundnumber]["Meta"]["Name"]} by ${levelList[roundnumber]["Meta"]["Publisher"]["name"]}`
+        document.getElementById('levelName').href = `https://gdladder.com/level/${levelList[roundnumber]["ID"]}`
+
+        document.getElementById('actualdifficulty').innerHTML = `(t${Math.round(levelList[roundnumber]["Rating"])})`
+        document.getElementById('diffprediction').innerHTML = `You thought: t${diffPredictionsPerRound[roundnumber]}`
+
+        let amount = document.createElement('span')
+        amount.innerHTML = `(${rarity})`
+        amount.classList.add('skillsetrarity')
+        if(skillsetsPerLevel[roundnumber].slice(0,7).includes(i)){
+            if(rarity>maxSkillset*0.2){
+                skillset.classList.add('relevant') //renevant by nikrodox
+            }
+        } else{
+            skillset.classList.add('irrelevant') //irrenevant by irnikrodox?
+        }
+        skillset.appendChild(amount)
+        document.getElementById('skillsetlist').appendChild(skillset)
+    }
+
+    document.getElementById('yourskillsetlist').innerHTML = ''
+    for(let j of skillsetGuessesPerRound[roundnumber]){
+        let selfSkillset = document.createElement('span')
+        selfSkillset.innerHTML = j
+        selfSkillset.classList.add('skillsettype')
+
+        document.getElementById('yourskillsetlist').appendChild(selfSkillset)
+    }
+
+    document.getElementById('recap').classList.remove('hidden')
+}
+
+document.getElementById('nextround').addEventListener('click', async function(){
+    currentRound++
+    document.getElementById('recap').classList.add('hidden')
+    if(currentRound<5){
+        await getRound(currentRound)
+    }
+    GDDLSkillsetSel.setValue([])
+})
+
+let diffPredictionsPerRound = Array(5)
+
 async function submitguess(){
+    document.getElementById('ytvid').src=''
     let points;
     if(gamemode=='gddl'){
+        skillsetGuessesPerRound[currentRound] = [...GDDLSkillsetSel.getValue()]
+        console.log(skillsetGuessesPerRound[currentRound])
         points = await calculateGDDLPoints(currentRound, Number(document.getElementById('diffrange').value), GDDLSkillsetSel.getValue())
-        GDDLSkillsetSel.setValue()
     }
     console.log(points)
 
-    currentRound++
-    await getRound(currentRound)
+    pointsperRound[currentRound] = points
+    totalpoints += points
+
+    diffPredictionsPerRound[currentRound] = document.getElementById('diffrange').value
+
+    document.getElementById('pointcount').innerHTML = `${Math.round(totalpoints)} points`
+    openRecap(currentRound)
 }
 
 document.getElementById('submitguess').addEventListener('click', async function(){await submitguess()})

@@ -143,6 +143,49 @@ body{
     border: 3px solid orange
 }
 
+.recap{
+    font-size: 200%;
+    text-align: center;
+    width: 80vw;
+    height: 80vh;
+    left: 10vw;
+    top: 10vh;
+    position: fixed;
+    color: #ddd;
+    background-color: rgba(50,50,50,0.95);
+    overflow-y: auto;
+    border-radius: 25px;
+    z-index: 10;
+}
+
+.skillsettype{
+    color: black;
+    display: inline-block;
+    background-color: lightgray;
+    border: 5px solid lightgray;
+    border-radius: 5px;
+    margin: 0 5px 10px 5px;
+}
+
+.relevant{
+    background-color: lightgoldenrodyellow;
+    border-color: lightyellow;
+}
+
+.irrelevant{
+    background-color: gray;
+    border-color: gray;
+}
+
+.skillsetrarity{
+    display: none; /* this might look cool idk */
+    font-size: 50%;
+}
+
+.skillsettype:hover .skillsetrarity{
+    display: inline-block;
+}
+
 .blockrectangle{
     position: absolute;
     background: black;
