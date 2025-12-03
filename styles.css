@@ -1,8 +1,6 @@
 body{
-    height: 100%;
-    width: 100%;
     background: beige;
-    background: linear-gradient(25deg,rgba(255, 225, 222, 1) 0%, rgba(255, 248, 224, 1) 100%);
+    background: linear-gradient(25deg,rgb(255, 216, 212) 0%, rgba(255, 248, 224, 1) 100%);
     font-family: 'Pusab';
     user-select: none;
 }
@@ -59,6 +57,8 @@ body{
 }
 
 .game{
+    margin-top: 15vh;
+    padding-bottom: 15vh;
     position: absolute;
     left: 50%;
     top: 50%;
@@ -95,6 +95,52 @@ body{
 
 .ts-control input{
     font-size: 32px;
+}
+
+.difficulties{
+    height: 15vmin;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.difficulty{
+    filter: brightness(50%);
+    width: 7vmin;
+    transition: width 0.2s;
+}
+
+.difficulty.selected{
+    filter: brightness(100%);
+    width: 15vmin;
+}
+
+.diffsel{
+    display: flex;
+    align-content: center;
+    justify-content: space-evenly;
+}
+
+.difficultyrange{
+    width: 80%;
+}
+
+.diff{
+    text-align: center;
+}
+
+.submit{
+    color: white;
+    font-size: 5vh;
+    background-color: maroon;
+    border: 3px solid red;
+    border-radius: 10px;
+    padding: 8px;
+}
+
+.submit:hover{
+    background-color: red;
+    border: 3px solid orange
 }
 
 .blockrectangle{
