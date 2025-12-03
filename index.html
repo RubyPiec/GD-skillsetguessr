@@ -1,21 +1,38 @@
 <html>
     <head>
         <title>GD Skillsetguessr</title>
+        <script src="variables.js"></script>
+        <meta name="referrer" content="strict-origin-when-cross-origin">
+
+        <link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
+
         <link rel="stylesheet" href="styles.css">
     </head>
-    <body>
-        <div class="gmselscreen">
+    <body style="overflow-x: hidden; overflow-y: hidden;">
+        <div class="gmselscreen" id="gmselscreen">
             <h1>Choose a dataset</h1>
             <div class="gamemodeselect">
-                <div class="gamemode" style="background-image: url(assets/logo_aredl.png)">
+                <div class="gamemode" style="background-image: url(assets/logo_aredl.png)" id="aredlbutton">
                     <h2 class="gamemodetitle">AREDL</h2>
                     <span class="gamemodedesc">Get skillsets from the All Rated Extreme Demons List</span>
                 </div>
-                <div class="gamemode" style="background-image: url(assets/logo_gddl.png)">
+                <div class="gamemode" style="background-image: url(assets/logo_gddl.png)" id="gddlbutton">
                     <h2>GDDL</h2>
                     <span>Get skillsets from the Geometry Dash Demon Ladder</span>
                 </div>
             </div>
         </div>
+        <div class="game hidden" id="game">
+            <div class="blockrectangle"></div>
+            <iframe class="ytvid" id="ytvid" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen>
+            </iframe>
+            <br><br>
+            <h1>Skillsets:</h1>
+            <select id="skillsets" class="skillsetsel" placeholder="Choose a skillset..." multiple>
+                <option value="...">...</option>
+            </select>
+        </div>
+        <script src="script.js"></script>
     </body>
 </html>
