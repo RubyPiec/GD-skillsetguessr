@@ -50,21 +50,34 @@
             <button class="submit" id="submitguess">Guess!</button>
         </div>
         <div class="recap hidden" id="recap">
-            <h4 style="margin: 5px; color: white;" id="recappoints">3 points</h4>
-            <h1 style="margin-top: 0; color: white;">You just saw:</h1>
-                <a href="https://gdladder.com/level/58825144" id="levelName" style="color: #ccc" id="level">xo by KrmaL</a> <span id="actualdifficulty">(t30)</span>
-                <p style="font-size: 50%;" id="diffprediction">You thought: t10</p>
-            <br>
-            <h1 style="color: white;">Skillsets:</h1>
-                <div id="skillsetlist">
-                    <span class="skillsettype relevant">Ship<span class="skillsetrarity">(20)</span></span> <span class="skillsettype">Maybe ship<span class="skillsetrarity">(15)</span></span> <span class="skillsettype irrelevant">Not ship<span class="skillsetrarity">(10)</span></span>
+            <div class="hidden" id="roundover">
+                <h4 style="margin: 5px; color: white;" id="recappoints">3 points</h4>
+                <h1 style="margin-top: 0; color: white;">You just saw:</h1>
+                    <a href="https://gdladder.com/level/58825144" id="levelName" style="color: #ccc" id="level">xo by KrmaL</a> <span id="actualdifficulty">(t30)</span>
+                    <p style="font-size: 50%;" id="diffprediction">You thought: t10</p>
+                <br>
+                <h1 style="color: white;">Skillsets:</h1>
+                    <div id="skillsetlist">
+                        <span class="skillsettype relevant">Ship<span class="skillsetrarity">(20)</span></span> <span class="skillsettype">Maybe ship<span class="skillsetrarity">(15)</span></span> <span class="skillsettype irrelevant">Not ship<span class="skillsetrarity">(10)</span></span>
+                    </div>
+                <h3 style="color: white; margin: 0;">You said:</h2>
+                    <div id="yourskillsetlist">
+                        <span class="skillsettype">Nerve Control</span>
+                    </div>
+                <br>
+                <button id="nextround" class="continue">Continue</button>
+            </div>
+            <div class="hidden" id="gameover">
+                <p style="padding-bottom: 20px; border-bottom: 1px solid white;" id="gameoverpoints">25000/25000 points</p>
+
+                <div style="display: flex; justify-content: center; margin-bottom: 20px;" id="roundstats1">
+                    <span style="font-size: 130%; color: white;">Round 1: 0/5000</span><button style="margin-left: 0.5vw;">View</button><br>
+                    <br>
                 </div>
-            <h3 style="color: white; margin: 0;">You said:</h2>
-                <div id="yourskillsetlist">
-                    <span class="skillsettype">Nerve Control</span>
+                <div id="non1roundstats"> <!-- This only exists for easy cleanup -->
+
                 </div>
-            <br>
-            <button id="nextround" class="continue">Continue</button>
+            </div>
         </div>
         <script src="script.js"></script>
     </body>

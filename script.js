@@ -33,7 +33,7 @@ document.getElementById('diffrange').addEventListener('input', function(){
 })
 
 async function fetchGDDLLevels(){
-    let response = await fetch('https://skillsetguessr.rubypiec.workers.dev/?site=gddl&url='+encodeURIComponent('level/search?limit=25&page=0&sort=random&sortDirection=asc&loop=1&controls=0'));
+    let response = await fetch('https://skillsetguessr.rubypiec.workers.dev/?site=gddl&url='+encodeURIComponent('level/search?limit=25&page=0&sort=random&sortDirection=asc&minDeviation=0.01&minSubmissionCount=5'));
     if(!response.ok){
         throw new Error(`Response status: ${response.status}`)
     }
@@ -46,24 +46,40 @@ async function fetchGDDLLevels(){
     }
 }
 
+let maxRound = 5; // THIS IS **NOT** BEING INDEXED AT 0. THIS IS JUST THE AMOUNT OF ROUNDS THERE ARE.
+
 let currentRound = 0;
 let levelList;
 
-let pointsperRound = Array(5)
+let pointsperRound = Array(maxRound)
 let totalpoints = 0;
+let offset = 0;
 
 let GDDLSkillsetSel
 
 async function getRound(roundnum){ // WE ARE INDEXING AT **0**. ZERO IS THE FIRST ROUND. PLEASE DO NOT FORGET THIS.
+    if(roundnum+1>maxRound){
+        console.log('game beaten :3')
+        openRecap(roundnum)
+        return;
+    }
+    document.getElementById('gameover').classList.add('hidden')
+    document.getElementById('roundover').classList.remove('hidden')
     if(roundnum>levelList.length-1){
         let newBatch = await fetchGDDLLevels()
         levelList = levelList.concat(newBatch)
     }
     console.log(levelList[roundnum])
-    document.getElementById('ytvid').src = `https://www.youtube.com/embed/${levelList[roundnum]["Showcase"]}?autoplay=1&enablejsapi=1`
+    document.getElementById('ytvid').src = `https://www.youtube.com/embed/${levelList[roundnum]["Showcase"]}?autoplay=1&enablejsapi=1&loop=1`
 }
 
 async function startGame(){
+    offset = 0;
+    currentRound = 0;
+    levelList = [];
+    pointsperRound = Array(maxRound)
+    totalpoints = 0;
+
     document.body.style.overflowY = 'auto'
     document.getElementById('game').classList.remove('hidden')
     gameStarted = true
@@ -120,7 +136,7 @@ async function startGame(){
     }
 }
 
-let skillsetsPerLevel = Array(5)
+let skillsetsPerLevel = Array(maxRound)
 
 async function calculateGDDLPoints(roundNum, diffGuess, skillsetGuess){
     let levelID = levelList[roundNum]["ID"]
@@ -173,25 +189,54 @@ async function calculateGDDLPoints(roundNum, diffGuess, skillsetGuess){
                     console.log('kinda irrelevant but ok ' + i) // If it is, no worries!
                 } else{
                     // BAD GUESS
-                    console.log(i + ' nuh uh. -10%')
-                    multiplier *= 0.9
+                    console.log(i + ' nuh uh. -5%')
+                    multiplier *= 0.95
                 }
             }
         } else{
-            console.log(i + ' nuh uh. -20%')
-            multiplier *= 0.8
+            console.log(i + ' nuh uh. -10%')
+            multiplier *= 0.9
         }
     }
 
     return points*multiplier;
 }
 
-let skillsetGuessesPerRound = Array(5)
+let skillsetGuessesPerRound = Array(maxRound)
 
 async function openRecap(roundnumber){
+    if(roundnumber+1>maxRound){
+        document.getElementById('non1roundstats').innerHTML = ''
+        document.getElementById('gameoverpoints').innerHTML = Math.round(totalpoints) + '/' + 5000*maxRound + ' points'
+        document.getElementById('roundstats1').children[0].innerHTML = `Round 1: ${Math.round(pointsperRound[0])}/5000`
+        for(let i=1; i<maxRound; i++){
+            let round = document.getElementById('roundstats1').cloneNode(true)
+            round.id = 'roundstats' + (i+1)
+            round.children[0].innerHTML = `Round ${i+1}: ${Math.round(pointsperRound[i])}/5000`
+            round.children[1].addEventListener('click', async function(){
+                await openRecap(i)
+            })
+
+            document.getElementById('non1roundstats').appendChild(round)
+        }
+        document.getElementById('roundstats1').children[1].addEventListener('click', async function openr(){
+            await openRecap(0)
+        })
+        document.getElementById('gameover').classList.remove('hidden')
+        document.getElementById('roundover').classList.add('hidden')
+        document.getElementById('recap').classList.remove('hidden')
+        console.log('game beaten :3')
+
+        return;
+    }
+
+    document.getElementById('roundover').classList.remove('hidden')
+    document.getElementById('gameover').classList.add('hidden')
+
     document.getElementById('recappoints').innerHTML = `+${Math.round(pointsperRound[roundnumber])}/5000 points`
 
     document.getElementById('skillsetlist').innerHTML = ''
+
 
     let maxSkillset = skillsetsPerLevel[roundnumber][0].ReactCount
     for(let i of skillsetsPerLevel[roundnumber]){
@@ -200,7 +245,8 @@ async function openRecap(roundnumber){
         skillset.classList.add('skillsettype')
         let rarity = i.ReactCount
 
-        document.getElementById('levelName').innerHTML = `${levelList[roundnumber]["Meta"]["Name"]} by ${levelList[roundnumber]["Meta"]["Publisher"]["name"]}`
+        let authorName = levelList[roundnumber]["Meta"]["Publisher"]["name"]
+        document.getElementById('levelName').innerHTML = `${levelList[roundnumber]["Meta"]["Name"]} by ${authorName ? authorName : '-'}`
         document.getElementById('levelName').href = `https://gdladder.com/level/${levelList[roundnumber]["ID"]}`
 
         document.getElementById('actualdifficulty').innerHTML = `(t${Math.round(levelList[roundnumber]["Rating"])})`
@@ -226,6 +272,15 @@ async function openRecap(roundnumber){
         selfSkillset.innerHTML = j
         selfSkillset.classList.add('skillsettype')
 
+        let maxSkillset = skillsetsPerLevel[roundnumber][0].ReactCount
+        if(skillsetsPerLevel[roundnumber].map(skillset => skillset.Tag.Name).includes(j)){
+            if(skillsetsPerLevel[roundnumber][skillsetsPerLevel[roundnumber].map(skillset => skillset.Tag.Name).indexOf(j)].ReactCount>maxSkillset*0.2){
+                selfSkillset.classList.add('relevant')
+            }
+        } else{
+            selfSkillset.classList.add('irrelevant')
+        }
+
         document.getElementById('yourskillsetlist').appendChild(selfSkillset)
     }
 
@@ -235,9 +290,7 @@ async function openRecap(roundnumber){
 document.getElementById('nextround').addEventListener('click', async function(){
     currentRound++
     document.getElementById('recap').classList.add('hidden')
-    if(currentRound<5){
-        await getRound(currentRound)
-    }
+    await getRound(currentRound)
     GDDLSkillsetSel.setValue([])
 })
 
