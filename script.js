@@ -83,7 +83,6 @@ let levelList;
 
 let pointsperRound = Array(maxRound)
 let totalpoints = 0;
-let offset = 0;
 
 let GDDLSkillsetSel
 let AREDLSkillsetSel
@@ -122,7 +121,6 @@ async function getRound(roundnum){ // WE ARE INDEXING AT **0**. ZERO IS THE FIRS
 }
 
 async function startGame(){
-    offset = 0;
     currentRound = 0;
     levelList = [];
     pointsperRound = Array(maxRound)
@@ -283,6 +281,11 @@ async function calculateAREDLPoints(roundNum, diffGuess, skillsetGuess){
 
 let skillsetGuessesPerRound = Array(maxRound)
 
+async function skipround(){ //alias: refreshvideo (because i keep LOSING where I PUT THIS FUNCTION)
+    levelList.splice(currentRound,1)
+    await getRound(currentRound)
+}
+
 async function openRecap(roundnumber){
     if(roundnumber+1>maxRound){
         document.getElementById('non1roundstats').innerHTML = ''
@@ -390,6 +393,10 @@ async function openRecap(roundnumber){
 
     document.getElementById('recap').classList.remove('hidden')
 }
+
+document.getElementById('unavailable').addEventListener('click', async function(){
+    await skipround()
+})
 
 document.getElementById('nextround').addEventListener('click', async function(){
     currentRound++

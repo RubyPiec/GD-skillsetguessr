@@ -2,6 +2,12 @@
 
 A game where you get shown a Geometry Dash level, and must guess its skillsets and difficulty.
 
+## How to play
+
+On the main screen, you will be able to choose between 2 datasets. **AREDL** chooses levels and corresponding skillsets (and difficulties) from the AREDL, while **GDDL** chooses levels and corresponding skillsets (and difficulties) from the GDDL. You are also able to choose between wheter you would like to do 5 rounds, 10 rounds, 15 rounds, 20 rounds, or 25 rounds.
+
+Upon choosing, you get shown a level's video. Based on this video, you must guess the skillsets of this level, and what difficulty you think it is. After guessing, hit the "Guess!" button and your score should show up. How this score is calculated is explained in the "Point calculation" section of this README. After all rounds are up, you get shown a recap with your points during every round, your total points, and a return to main menu button. This button effectively does the same as refreshing your page. 
+
 ## Point calculation
 
 The points you gain are split up in a Difficulty section, and a Skillset section. Skillsets account for 75% of your total points (3750), while Difficulty accounts for the remaining 25% (1250). These are added up and multiplied by a number depending on the amount of wrong skillsets. The exact formulas are given below:
