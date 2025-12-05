@@ -11,7 +11,14 @@
     </head>
     <body style="overflow-x: hidden; overflow-y: hidden;">
         <div class="gmselscreen" id="gmselscreen">
-            <h1>Choose a dataset</h1>
+            <h1 style="margin-bottom: 0;">Choose a dataset</h1>
+            <select id="roundamount" oninput="applyMaxRound()">
+                <option value="5">5 rounds</option>
+                <option value="10">10 rounds</option>
+                <option value="15">15 rounds</option>
+                <option value="20">20 rounds</option>
+                <option value="25">25 rounds</option>
+            </select>
             <div class="gamemodeselect">
                 <div class="gamemode" style="background-image: url(assets/logo_aredl.png)" id="aredlbutton">
                     <h2 class="gamemodetitle">AREDL</h2>
@@ -46,6 +53,11 @@
                         <img src="assets/demon_extreme.png" class="difficulty">
                     </div>
                 </div>
+                <div id="aredldiffsel" style="display: none;">
+                    <div class="diffsel">
+                        <input class="difficultyrange" id="aredldiffrange" type="range" min="1" max="1000" value="1"><span class="diff" id="aredldifficulty"> top 1</span>
+                    </div>
+                </div>
             <br>
             <button class="submit" id="submitguess">Guess!</button>
         </div>
@@ -77,6 +89,8 @@
                 <div id="non1roundstats"> <!-- This only exists for easy cleanup -->
 
                 </div>
+                <br><br><br><br>
+                <button onclick="window.location.reload()">Go to main menu</button>
             </div>
         </div>
         <script src="script.js"></script>

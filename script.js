@@ -16,7 +16,7 @@ document.getElementById('gddlbutton').addEventListener('click', async function()
 document.getElementById('diffrange').addEventListener('input', function(){
     let difficulty = document.getElementById('diffrange').value
     document.getElementById('difficulty').innerHTML = ` tier ${difficulty}`
-    for(i=0;i<=4;i++){
+    for(let i=0;i<=4;i++){
         document.getElementsByClassName('difficulty')[i].classList.remove('selected')
     }
     if(difficulty<=5){
@@ -30,6 +30,11 @@ document.getElementById('diffrange').addEventListener('input', function(){
     } else{
         document.getElementsByClassName('difficulty')[4].classList.add('selected')
     }
+})
+
+document.getElementById('aredldiffrange').addEventListener('input', function(){
+    let difficulty = document.getElementById('aredldiffrange').value
+    document.getElementById('aredldifficulty').innerHTML = ` top ${difficulty}`
 })
 
 async function fetchGDDLLevels(){
@@ -46,7 +51,32 @@ async function fetchGDDLLevels(){
     }
 }
 
-let maxRound = 5; // THIS IS **NOT** BEING INDEXED AT 0. THIS IS JUST THE AMOUNT OF ROUNDS THERE ARE.
+function shuffleArray(array) {
+    for (let i = array.length - 1; i >= 1; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+} // Code stolen straight from wikipedia. Tried implementing it myself but ig javascript hates me. 'cant access declaration'...
+
+async function fetchAREDLLevels(){
+    let response = await fetch('https://skillsetguessr.rubypiec.workers.dev/?site=aredl&url='+encodeURIComponent('aredl/levels'));
+    let levelList = await response.json()
+    let filteredLevels = levelList.filter(level => level["tags"].length>0)
+    document.getElementById('aredldiffrange').max = levelList.length
+    return shuffleArray(filteredLevels);
+}
+
+
+let maxRound = Number(document.getElementById('roundamount').value); // THIS IS **NOT** BEING INDEXED AT 0. THIS IS JUST THE AMOUNT OF ROUNDS THERE ARE.
+
+function applyMaxRound(){
+    maxRound = Number(document.getElementById('roundamount').value)
+    pointsperRound = Array(maxRound)
+    skillsetsPerLevel = Array(maxRound)
+    skillsetGuessesPerRound = Array(maxRound)
+    aredlLevelDataPer = Array(maxRound);
+}
 
 let currentRound = 0;
 let levelList;
@@ -56,7 +86,15 @@ let totalpoints = 0;
 let offset = 0;
 
 let GDDLSkillsetSel
+let AREDLSkillsetSel
 
+async function getLevelData(levelid){
+    let response = await fetch('https://skillsetguessr.rubypiec.workers.dev/?site=aredl&url='+encodeURIComponent(`aredl/levels/${levelid}`));
+    let levelData = await response.json()
+    return levelData
+}
+
+let aredlLevelDataPer = Array(maxRound);
 async function getRound(roundnum){ // WE ARE INDEXING AT **0**. ZERO IS THE FIRST ROUND. PLEASE DO NOT FORGET THIS.
     if(roundnum+1>maxRound){
         console.log('game beaten :3')
@@ -65,12 +103,22 @@ async function getRound(roundnum){ // WE ARE INDEXING AT **0**. ZERO IS THE FIRS
     }
     document.getElementById('gameover').classList.add('hidden')
     document.getElementById('roundover').classList.remove('hidden')
-    if(roundnum>levelList.length-1){
-        let newBatch = await fetchGDDLLevels()
-        levelList = levelList.concat(newBatch)
+    if(gamemode == 'gddl'){
+        if(roundnum>levelList.length-1){
+            let newBatch = await fetchGDDLLevels()
+            levelList = levelList.concat(newBatch)
+        }
     }
     console.log(levelList[roundnum])
-    document.getElementById('ytvid').src = `https://www.youtube.com/embed/${levelList[roundnum]["Showcase"]}?autoplay=1&enablejsapi=1&loop=1`
+    let showcaseUrl;
+    if(gamemode == 'gddl'){
+        showcaseUrl = levelList[roundnum]["Showcase"]
+    }
+    if(gamemode == 'aredl'){
+        aredlLevelDataPer[roundnum] = await getLevelData(levelList[roundnum]["level_id"])
+        showcaseUrl = aredlLevelDataPer[roundnum]["verifications"][0]["video_url"].split('?si')[0].split('&t=')[0].split('/')[3].split('watch?v=').filter(n=>n)[0] //this is such a messy line of code aagh
+    }
+    document.getElementById('ytvid').src = `https://www.youtube.com/embed/${showcaseUrl}?autoplay=1&enablejsapi=1&loop=1`
 }
 
 async function startGame(){
@@ -106,7 +154,7 @@ async function startGame(){
             },
             allowEmptyOption: true,
             maxItems: 7,
-            onChange: function(){GDDLSkillsetSel.setTextboxValue(); GDDLSkillsetSel.close()}
+            onChange: function(){ GDDLSkillsetSel.setTextboxValue(); GDDLSkillsetSel.close(); }
         });
 
 
@@ -115,6 +163,7 @@ async function startGame(){
         await getRound(currentRound)
     }
     if(gamemode=='aredl'){
+        document.getElementById("aredldiffsel").style.display = 'block'
         // SET UP SKILLSET CHOICES
         for(let j of aredltags){
             let option = document.createElement('option')
@@ -124,15 +173,19 @@ async function startGame(){
             document.getElementById('skillsets').appendChild(option)
         }
 
-        let aredlSkillsetSel = new TomSelect("#skillsets",{
+        AREDLSkillsetSel = new TomSelect("#skillsets",{
             plugins: {
                 remove_button:{
                     title:'Remove this item',
                 }
             },
             allowEmptyOption: true,
-            maxItems: 7
+            maxItems: 7,
+            onchange: function(){ AREDLSkillsetSel.setTextboxValue(); AREDLSkillsetSel.close(); } //note to self: fix whatever this is
         });
+
+        levelList = await fetchAREDLLevels()
+        await getRound(currentRound)
     }
 }
 
@@ -153,7 +206,7 @@ async function calculateGDDLPoints(roundNum, diffGuess, skillsetGuess){
     console.log(skillsets)
     let totalSkillsetVotes;
     let highestSkillsetVotes = 0;
-    for(i of skillsets){
+    for(let i of skillsets){
         if(i.ReactCount>highestSkillsetVotes){highestSkillsetVotes = i.ReactCount} 
         totalSkillsetVotes+=i.ReactCount
     }
@@ -170,7 +223,7 @@ async function calculateGDDLPoints(roundNum, diffGuess, skillsetGuess){
     console.log(relevantSkillsets)
 
     let totalRelevantVotes = 0;
-    for(i of relevantSkillsets){ // This is so poorly coded LMAOOo // i barely fucking know what i was doing tbh
+    for(let i of relevantSkillsets){ // This is so poorly coded LMAOOo // i barely fucking know what i was doing tbh
         totalRelevantVotes+=i.ReactCount
     }
 
@@ -200,6 +253,15 @@ async function calculateGDDLPoints(roundNum, diffGuess, skillsetGuess){
     }
 
     return points*multiplier;
+}
+
+async function calculateAREDLPoints(roundNum, diffGuess, skillsetGuess){
+    let position = levelList[roundNum]["position"]
+    let skillsets = levelList[roundNum]["tags"]
+
+    skillsetsPerLevel[roundNum] = skillsets
+
+    return Math.random()*5000;
 }
 
 let skillsetGuessesPerRound = Array(maxRound)
@@ -241,28 +303,42 @@ async function openRecap(roundnumber){
     let maxSkillset = skillsetsPerLevel[roundnumber][0].ReactCount
     for(let i of skillsetsPerLevel[roundnumber]){
         let skillset = document.createElement('span') 
-        skillset.innerHTML = i.Tag.Name
         skillset.classList.add('skillsettype')
-        let rarity = i.ReactCount
 
-        let authorName = levelList[roundnumber]["Meta"]["Publisher"]["name"]
-        document.getElementById('levelName').innerHTML = `${levelList[roundnumber]["Meta"]["Name"]} by ${authorName ? authorName : '-'}`
-        document.getElementById('levelName').href = `https://gdladder.com/level/${levelList[roundnumber]["ID"]}`
+        if(gamemode=='gddl'){
+            skillset.innerHTML = i.Tag.Name
+            let rarity = i.ReactCount
 
-        document.getElementById('actualdifficulty').innerHTML = `(t${Math.round(levelList[roundnumber]["Rating"])})`
-        document.getElementById('diffprediction').innerHTML = `You thought: t${diffPredictionsPerRound[roundnumber]}`
+            let authorName = levelList[roundnumber]["Meta"]["Publisher"]["name"]
+            document.getElementById('levelName').innerHTML = `${levelList[roundnumber]["Meta"]["Name"]} by ${authorName ? authorName : '-'}`
+            document.getElementById('levelName').href = `https://gdladder.com/level/${levelList[roundnumber]["ID"]}`
 
-        let amount = document.createElement('span')
-        amount.innerHTML = `(${rarity})`
-        amount.classList.add('skillsetrarity')
-        if(skillsetsPerLevel[roundnumber].slice(0,7).includes(i)){
-            if(rarity>maxSkillset*0.2){
-                skillset.classList.add('relevant') //renevant by nikrodox
+            document.getElementById('actualdifficulty').innerHTML = `(t${Math.round(levelList[roundnumber]["Rating"])})`       
+            document.getElementById('diffprediction').innerHTML = `You thought: t${diffPredictionsPerRound[roundnumber]}`
+
+            let amount = document.createElement('span')
+            amount.innerHTML = `(${rarity})`
+            amount.classList.add('skillsetrarity')
+            if(skillsetsPerLevel[roundnumber].slice(0,7).includes(i)){
+                if(rarity>maxSkillset*0.2){
+                    skillset.classList.add('relevant') //renevant by nikrodox
+                }
+            } else{
+                skillset.classList.add('irrelevant') //irrenevant by irnikrodox?
             }
-        } else{
-            skillset.classList.add('irrelevant') //irrenevant by irnikrodox?
+            skillset.appendChild(amount)
         }
-        skillset.appendChild(amount)
+        if(gamemode=='aredl'){
+            let authorName = aredlLevelDataPer[roundnumber]["publisher"]["global_name"]
+
+            document.getElementById('levelName').innerHTML = `${levelList[roundnumber]["name"]} by ${authorName ? authorName : '-'}`
+            document.getElementById('levelName').href = `https://aredl.net/list/${levelList[roundnumber]["level_id"]}`
+
+            document.getElementById('actualdifficulty').innerHTML = `(top ${Math.round(levelList[roundnumber]["position"])})`
+            document.getElementById('diffprediction').innerHTML = `You thought: top ${diffPredictionsPerRound[roundnumber]}`
+
+            skillset.innerHTML = i
+        }
         document.getElementById('skillsetlist').appendChild(skillset)
     }
 
@@ -272,13 +348,15 @@ async function openRecap(roundnumber){
         selfSkillset.innerHTML = j
         selfSkillset.classList.add('skillsettype')
 
-        let maxSkillset = skillsetsPerLevel[roundnumber][0].ReactCount
-        if(skillsetsPerLevel[roundnumber].map(skillset => skillset.Tag.Name).includes(j)){
-            if(skillsetsPerLevel[roundnumber][skillsetsPerLevel[roundnumber].map(skillset => skillset.Tag.Name).indexOf(j)].ReactCount>maxSkillset*0.2){
-                selfSkillset.classList.add('relevant')
+        if(gamemode=='gddl'){
+            let maxSkillset = skillsetsPerLevel[roundnumber][0].ReactCount
+            if(skillsetsPerLevel[roundnumber].map(skillset => skillset.Tag.Name).includes(j)){
+                if(skillsetsPerLevel[roundnumber][skillsetsPerLevel[roundnumber].map(skillset => skillset.Tag.Name).indexOf(j)].ReactCount>maxSkillset*0.2){
+                    selfSkillset.classList.add('relevant')
+                }
+            } else{
+                selfSkillset.classList.add('irrelevant')
             }
-        } else{
-            selfSkillset.classList.add('irrelevant')
         }
 
         document.getElementById('yourskillsetlist').appendChild(selfSkillset)
@@ -291,7 +369,12 @@ document.getElementById('nextround').addEventListener('click', async function(){
     currentRound++
     document.getElementById('recap').classList.add('hidden')
     await getRound(currentRound)
-    GDDLSkillsetSel.setValue([])
+    if(GDDLSkillsetSel){
+        GDDLSkillsetSel.setValue([])
+    }
+    if(AREDLSkillsetSel){
+        AREDLSkillsetSel.setValue([])
+    }
 })
 
 let diffPredictionsPerRound = Array(5)
@@ -304,12 +387,22 @@ async function submitguess(){
         console.log(skillsetGuessesPerRound[currentRound])
         points = await calculateGDDLPoints(currentRound, Number(document.getElementById('diffrange').value), GDDLSkillsetSel.getValue())
     }
+    if(gamemode=='aredl'){
+        skillsetGuessesPerRound[currentRound] = [...AREDLSkillsetSel.getValue()]
+        console.log(skillsetGuessesPerRound[currentRound])
+        points = await calculateAREDLPoints(currentRound, Number(document.getElementById('aredldiffrange').value), AREDLSkillsetSel.getValue())
+    }
     console.log(points)
 
     pointsperRound[currentRound] = points
     totalpoints += points
 
-    diffPredictionsPerRound[currentRound] = document.getElementById('diffrange').value
+    if(gamemode=='gddl'){
+        diffPredictionsPerRound[currentRound] = document.getElementById('diffrange').value
+    }
+    if(gamemode=='aredl'){
+        diffPredictionsPerRound[currentRound] = document.getElementById('aredldiffrange').value
+    }
 
     document.getElementById('pointcount').innerHTML = `${Math.round(totalpoints)} points`
     openRecap(currentRound)

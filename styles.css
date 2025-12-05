@@ -118,14 +118,19 @@ body{
 .diffsel{
     display: flex;
     align-content: center;
-    justify-content: space-evenly;
+    justify-content: space-around;
+    margin-bottom: 20px;
 }
 
 .difficultyrange{
+    position: absolute;
+    left: 0;
     width: 80%;
 }
 
 .diff{
+    position: absolute;
+    right: 0;
     text-align: center;
 }
 

@@ -121,4 +121,5 @@ let gddltags = [
   }
 ]
 
-let aredltags = ["2.2","2.1","2.0","1.9PS","1.9","1.8","1.6PS","1.6","1.5","Medium","Long","XL","XXL","XXXL","XXXXXL","XXXXXXL","XXXXXXXL","XXXXXXXXL","XXXXXXXXXL","XXL+","Eon","NONG","2P","Circles","Clicksync","Fast-Paced","Timings","Chokepoints","Learny","Memory","High CPS","Gimmicky","Flow","Slow-Paced","Precision","Bossfight","Mirror","Nerve Control","Cube","Ship","Ball","UFO","Wave","Robot","Spider","Old Swing","New Swing","Duals","Overall"]
+let ALLaredltags = ["2.2","2.1","2.0","1.9PS","1.9","1.8","1.6PS","1.6","1.5","Medium","Long","XL","XXL","XXXL","XXXXXL","XXXXXXL","XXXXXXXL","XXXXXXXXL","XXXXXXXXXL","XXL+","Eon","NONG","2P","Circles","Clicksync","Fast-Paced","Timings","Chokepoints","Learny","Memory","High CPS","Gimmicky","Flow","Slow-Paced","Precision","Bossfight","Mirror","Nerve Control","Cube","Ship","Ball","UFO","Wave","Robot","Spider","Old Swing","New Swing","Duals","Overall"]
+let aredltags = ["Clicksync","Fast-Paced","Timings","Chokepoints","Learny","Memory","High CPS","Gimmicky","Flow","Slow-Paced","Precision","Bossfight","Mirror","Nerve Control","Cube","Ship","Ball","UFO","Wave","Robot","Spider","Old Swing","New Swing","Duals","Overall"]
