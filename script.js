@@ -116,7 +116,7 @@ async function getRound(roundnum){ // WE ARE INDEXING AT **0**. ZERO IS THE FIRS
     }
     if(gamemode == 'aredl'){
         aredlLevelDataPer[roundnum] = await getLevelData(levelList[roundnum]["level_id"])
-        showcaseUrl = aredlLevelDataPer[roundnum]["verifications"][0]["video_url"].split('?si')[0].split('&t=')[0].split('/')[3].split('watch?v=').filter(n=>n)[0] //this is such a messy line of code aagh
+        showcaseUrl = aredlLevelDataPer[roundnum]["verifications"][0]["video_url"].split('?si')[0].split('&')[0].split('/')[3].split('watch?v=').filter(n=>n)[0] //this is such a messy line of code aagh
     }
     document.getElementById('ytvid').src = `https://www.youtube.com/embed/${showcaseUrl}?autoplay=1&enablejsapi=1&loop=1`
 }
@@ -181,7 +181,7 @@ async function startGame(){
             },
             allowEmptyOption: true,
             maxItems: 7,
-            onchange: function(){ AREDLSkillsetSel.setTextboxValue(); AREDLSkillsetSel.close(); } //note to self: fix whatever this is
+            onChange: function(){ AREDLSkillsetSel.setTextboxValue(); AREDLSkillsetSel.close(); }
         });
 
         levelList = await fetchAREDLLevels()
@@ -259,9 +259,26 @@ async function calculateAREDLPoints(roundNum, diffGuess, skillsetGuess){
     let position = levelList[roundNum]["position"]
     let skillsets = levelList[roundNum]["tags"]
 
-    skillsetsPerLevel[roundNum] = skillsets
+    let relevantSkillsets = levelList[roundNum]["tags"].filter(skillset => aredltags.includes(skillset))
 
-    return Math.random()*5000;
+    skillsetsPerLevel[roundNum] = skillsets
+    let points = 0
+
+    let multiplier = 1
+
+    points = Math.max(1250 - (diffGuess**(5/6)-position**(5/6))**2, 0)
+
+    for(let i of skillsetGuess){
+        if(relevantSkillsets.includes(i)){
+            console.log(i + ' wowzers! +' + (3750/relevantSkillsets.length))
+            points += 3750/relevantSkillsets.length
+        } else{
+            console.log(i + ' nuh uh. -10%')
+            multiplier *= 0.9
+        }
+    }
+
+    return points * multiplier
 }
 
 let skillsetGuessesPerRound = Array(maxRound)
@@ -338,6 +355,10 @@ async function openRecap(roundnumber){
             document.getElementById('diffprediction').innerHTML = `You thought: top ${diffPredictionsPerRound[roundnumber]}`
 
             skillset.innerHTML = i
+
+            if(aredltags.includes(i)){
+                skillset.classList.add('relevant')
+            }
         }
         document.getElementById('skillsetlist').appendChild(skillset)
     }
@@ -355,6 +376,11 @@ async function openRecap(roundnumber){
                     selfSkillset.classList.add('relevant')
                 }
             } else{
+                selfSkillset.classList.add('irrelevant')
+            }
+        }
+        if(gamemode=='aredl'){
+            if(!skillsetsPerLevel[roundnumber].includes(j)){
                 selfSkillset.classList.add('irrelevant')
             }
         }
