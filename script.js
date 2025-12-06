@@ -469,6 +469,7 @@ async function submitguess(){
 
 if(knownGames.length>=1){
     document.getElementById('bestscorebutton').classList.remove('hidden')
+    document.getElementById('gap').classList.add('hidden')
 }
 document.getElementById('bestscorebutton').addEventListener('click', function(){
     document.getElementById('bestscores').classList.remove('hidden')
