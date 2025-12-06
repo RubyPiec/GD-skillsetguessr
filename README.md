@@ -4,7 +4,11 @@ A game where you get shown a Geometry Dash level, and must guess its skillsets a
 
 ## How to play
 
-On the main screen, you will be able to choose between 2 datasets. **AREDL** chooses levels and corresponding skillsets (and difficulties) from the AREDL, while **GDDL** chooses levels and corresponding skillsets (and difficulties) from the GDDL. You are also able to choose between wheter you would like to do 5 rounds, 10 rounds, 15 rounds, 20 rounds, or 25 rounds.
+### The main menu
+
+On the main screen, you will be able to choose between 2 datasets. **AREDL** chooses levels and corresponding skillsets (and difficulties) from the AREDL, while **GDDL** chooses levels and corresponding skillsets (and difficulties) from the GDDL. You are also able to choose between whether you would like to do 5 rounds, 10 rounds, 15 rounds, 20 rounds, or 25 rounds. If you have already finished a game, the main menu also displays a button that allows you to inspect what your best games so far have been. This is sorted by **average points per round**, in order to ensure that 25 round games don't have a far higher chance to show up than 5 round games.
+
+### The game
 
 Upon choosing, you get shown a level's video. Based on this video, you must guess the skillsets of this level, and what difficulty you think it is. After guessing, hit the "Guess!" button and your score should show up. How this score is calculated is explained in the "Point calculation" section of this README. After all rounds are up, you get shown a recap with your points during every round, your total points, and a return to main menu button. This button effectively does the same as refreshing your page. 
 
@@ -33,6 +37,10 @@ Multiplier*: $ 0.9^{wrong} \cdot 0.95^{irrelevant} $
 - semirelevant (Any skillset that has less than 20% of the votes of the most commonly voted skillset)
 - irrelevant (Skillsets that are not in the top 7 most voted)
 - wrong (Everything that is not in the list of skillsets)</sub>
+
+## Other notes
+
+Note that this website may not be optimized to work on mobile!
 
 ## Credits
 

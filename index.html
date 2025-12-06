@@ -33,14 +33,38 @@
                     <span>Get skillsets from the Geometry Dash Demon Ladder</span>
                 </div>
             </div>
+            <button id="bestscorebutton" class="bestscores hidden">My best scores</button><br> <!-- note that this is referred to games or scores depending on what my mood was at the time. there is no consistency here. good luck -->
+            <div style="display: flex; justify-content: space-evenly;">
+                <a href="https://forms.gle/piSmuF3QtaHtuYMV7">Bug report form</a> <a href="https://forms.gle/zyQKpuyZrNM9Dcn17">Feedback form</a>
+            </div>
+            <br>
+            <div style="display: flex; justify-content: space-evenly;">
+                <a href="https://aredl.net">AREDL website</a> <a href="https://gdladder.com">GDDL website</a>
+            </div>
+            <a href="privacy.html">Privacy Policy</a>
+        </div>
+        <div class="recap hidden" id="bestscores">
+            <h1 style="color:white;">Your best games:</h1>
+
+            <div id="topgame" style="display: flex; justify-content: center;">
+                <span>5 rounds | 25000/25000 points</span><button style="margin-left: 0.5vw;">Recap</button>
+                <br>
+            </div>
+            <div id="bestgames">
+                
+            </div>
+            <br><br><br><br>
+            <button style="font-size: 100%;" onclick="window.location.reload()">Go to main menu</button>
+            <br><br>
+            <button style="color:red;" onclick="if(confirm('ARE YOU SURE YOU WANT TO ERASE ALL DATA? THIS CHANGE IS IRREVERTIBLE.')){localStorage.clear();window.location.reload()}">CLEAR ALL DATA</button>
         </div>
         <div class="game hidden" id="game">
-            <button class="notloading" id="unavailable">Video unavailable?</button>
+            <h1 class="hidden" id="error" style="color: red; background-color: black;">WHOOPS LOL SEEMS LIKE THIS LEVEL CRASHES THE WEBSITE. SORRY ABOUT THAT. <a href="https://forms.gle/piSmuF3QtaHtuYMV7">CLICK HERE TO REPORT</a></h1>
             <h3 id="pointcount">0 points</h3>
             <div class="blockrectangle"></div>
             <iframe class="ytvid" id="ytvid" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share">
             </iframe>
-            <br><br>
+            <br><button class="notloading" id="unavailable">Video unavailable?</button><br>
             <h1>Skillsets:</h1>
                 <select id="skillsets" class="skillsetsel" placeholder="Choose a skillset..." multiple>
                 </select>
@@ -94,7 +118,9 @@
                 <div id="non1roundstats"> <!-- This only exists for easy cleanup -->
 
                 </div>
-                <br><br><br><br>
+                <br><br><br>
+                <button id="closewindow" style="font-size: 100%;" class="hidden" onclick="document.getElementById('recap').classList.add('hidden')">Close this window</button>
+                <br><br>
                 <button onclick="window.location.reload()">Go to main menu</button>
             </div>
         </div>

@@ -1,6 +1,15 @@
 let gamemode = null;
 let gameStarted = false;
 
+let gamesPlayed = 0;
+let knownGames = [];
+if(localStorage.getItem('knownGames')){
+    knownGames = JSON.parse(localStorage.getItem('knownGames'))
+}
+if(localStorage.getItem('gamesPlayed')){
+    gamesPlayed = JSON.parse(localStorage.getItem('gamesPlayed'))
+}
+
 document.getElementById('aredlbutton').addEventListener('click', async function(){
     gamemode = 'aredl'
     console.log('aredl time')
@@ -93,9 +102,18 @@ async function getLevelData(levelid){
     return levelData
 }
 
+let addedgame = false;
+
 let aredlLevelDataPer = Array(maxRound);
 async function getRound(roundnum){ // WE ARE INDEXING AT **0**. ZERO IS THE FIRST ROUND. PLEASE DO NOT FORGET THIS.
     if(roundnum+1>maxRound){
+        if(!addedgame){
+            knownGames.push([levelList, gamemode, pointsperRound, skillsetGuessesPerRound, skillsetsPerLevel, diffPredictionsPerRound, aredlLevelDataPer, totalpoints])
+            localStorage.setItem('knownGames', JSON.stringify(knownGames))
+            gamesPlayed++
+            localStorage.setItem('gamesPlayed', JSON.stringify(gamesPlayed))
+            addedgame = true
+        }
         console.log('game beaten :3')
         openRecap(roundnum)
         return;
@@ -117,7 +135,7 @@ async function getRound(roundnum){ // WE ARE INDEXING AT **0**. ZERO IS THE FIRS
         aredlLevelDataPer[roundnum] = await getLevelData(levelList[roundnum]["level_id"])
         showcaseUrl = aredlLevelDataPer[roundnum]["verifications"][0]["video_url"].split('?si')[0].split('&')[0].split('/')[3].split('watch?v=').filter(n=>n)[0] //this is such a messy line of code aagh
     }
-    document.getElementById('ytvid').src = `https://www.youtube.com/embed/${showcaseUrl}?autoplay=1&enablejsapi=1&loop=1`
+    document.getElementById('ytvid').src = `https://www.youtube-nocookie.com/embed/${showcaseUrl}?autoplay=1&enablejsapi=1&loop=1`
 }
 
 async function startGame(){
@@ -258,6 +276,7 @@ async function calculateAREDLPoints(roundNum, diffGuess, skillsetGuess){
     let skillsets = levelList[roundNum]["tags"]
 
     let relevantSkillsets = levelList[roundNum]["tags"].filter(skillset => aredltags.includes(skillset))
+    console.log(relevantSkillsets)
 
     skillsetsPerLevel[roundNum] = skillsets
     let points = 0
@@ -320,7 +339,13 @@ async function openRecap(roundnumber){
     document.getElementById('skillsetlist').innerHTML = ''
 
 
-    let maxSkillset = skillsetsPerLevel[roundnumber][0].ReactCount
+    let maxSkillset;
+    try{
+        maxSkillset = skillsetsPerLevel[roundnumber][0].ReactCount
+    } catch(err){
+        console.error(err)
+        document.getElementById('error').classList.remove('hidden')
+    }
     for(let i of skillsetsPerLevel[roundnumber]){
         let skillset = document.createElement('span') 
         skillset.classList.add('skillsettype')
@@ -329,8 +354,8 @@ async function openRecap(roundnumber){
             skillset.innerHTML = i.Tag.Name
             let rarity = i.ReactCount
 
-            let authorName = levelList[roundnumber]["Meta"]["Publisher"]["name"]
-            document.getElementById('levelName').innerHTML = `${levelList[roundnumber]["Meta"]["Name"]} by ${authorName ? authorName : '-'}`
+            let authorName = levelList[roundnumber]["Meta"]["Publisher"] ? levelList[roundnumber]["Meta"]["Publisher"]["name"] : '-'
+            document.getElementById('levelName').innerHTML = `${levelList[roundnumber]["Meta"]["Name"]} by ${authorName}`
             document.getElementById('levelName').href = `https://gdladder.com/level/${levelList[roundnumber]["ID"]}`
 
             document.getElementById('actualdifficulty').innerHTML = `(t${Math.round(levelList[roundnumber]["Rating"])})`       
@@ -398,6 +423,7 @@ document.getElementById('unavailable').addEventListener('click', async function(
     await skipround()
 })
 
+
 document.getElementById('nextround').addEventListener('click', async function(){
     currentRound++
     document.getElementById('recap').classList.add('hidden')
@@ -439,6 +465,63 @@ async function submitguess(){
 
     document.getElementById('pointcount').innerHTML = `${Math.round(totalpoints)} points`
     openRecap(currentRound)
+}
+
+if(knownGames.length>=1){
+    document.getElementById('bestscorebutton').classList.remove('hidden')
+}
+document.getElementById('bestscorebutton').addEventListener('click', function(){
+    document.getElementById('bestscores').classList.remove('hidden')
+
+    let sortedGames = knownGames.sort((a,b) => b[7]/b[2].length-a[7]/a[2].length)
+    console.log(sortedGames)
+
+    document.getElementById('bestgames').innerHTML = ''
+    for(let k in sortedGames){
+        if(k!=0){
+            let game = document.getElementById('topgame').cloneNode(true)
+            game.children[0].innerHTML = `${Number(k)+1}. ${sortedGames[k][2].length} rounds | ${sortedGames[k][1]} | ${Math.round(sortedGames[k][7])}/${5000*sortedGames[k][2].length} points`
+            game.children[1].addEventListener('click', async function(){
+                await loadGame(sortedGames[k])
+            })
+
+            document.getElementById('bestgames').appendChild(game)
+        }
+    }
+    document.getElementById('topgame').children[0].innerHTML = `1. ${sortedGames[0][2].length} rounds | ${sortedGames[0][1]} | ${Math.round(sortedGames[0][7])}/${5000*sortedGames[0][2].length} points`
+    document.getElementById('topgame').children[1].addEventListener('click', async function(){
+        await loadGame(sortedGames[0])
+    })
+})
+
+document.getElementById('closewindow').addEventListener('click', function(){
+    document.getElementById('recap').classList.add('hidden')
+    document.getElementById('closewindow').classList.add('hidden')
+    document.getElementById('bestscores').classList.remove('hidden')
+})
+
+async function loadGame(knownGame){ // [levelList, gamemode, pointsperRound, skillsetGuessesPerRound, skillsetsPerLevel, diffPredictionsPerRound, aredlLevelDataPer, totalpoints]
+    document.getElementById('bestscores').classList.add('hidden')
+    document.getElementById('closewindow').classList.remove('hidden')
+    addedgame = true
+
+    levelList = knownGame[0]
+    gamemode = knownGame[1]
+    pointsperRound = knownGame[2]
+    skillsetGuessesPerRound = knownGame[3]
+    skillsetsPerLevel = knownGame[4]
+    diffPredictionsPerRound = knownGame[5]
+    aredlLevelDataPer = knownGame[6]
+    totalpoints = knownGame[7]
+
+    maxRound = knownGame[2].length
+    currentRound = maxRound+1
+
+    for(i of pointsperRound){
+        totalpoints+=i
+    }
+
+    await openRecap(maxRound+1)
 }
 
 document.getElementById('submitguess').addEventListener('click', async function(){await submitguess()})

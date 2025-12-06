@@ -1,9 +1,19 @@
 body{
     background: beige;
-    background: linear-gradient(25deg,rgb(255, 216, 212) 0%, rgba(255, 248, 224, 1) 100%);
+    background: linear-gradient(25deg,rgb(255, 205, 200) 0%, rgb(255, 246, 216) 100%);
     font-family: 'Pusab';
     user-select: none;
 }
+
+
+.gmselscreen a{
+    position: relative;
+    bottom: 25px;
+    font-size: 1vw;
+    color: darkolivegreen; /* olive ?! */
+}
+
+
 
 .gmselscreen{
     position: absolute;
@@ -50,6 +60,23 @@ body{
     .gamemode span{
         visibility: hidden;
     }
+
+    .recap h1{
+        font-size: 125%;
+    }
+
+    .recap div span{
+        font-size: 75%;
+    }
+
+    .recap button{
+        font-size: 45%;
+    }
+
+    .recap div button{
+        margin-left: 5vw;
+        margin-right: 5vw;
+    }
 }
 
 .gamemode:hover{
@@ -57,7 +84,7 @@ body{
 }
 
 .game{
-    margin-top: 5vh;
+    margin-top: 2vh;
     padding-bottom: 15vh;
     position: absolute;
     left: 50%;
@@ -131,15 +158,22 @@ body{
     position: absolute;
     right: 0;
     text-align: center;
+    transition: transform 1s;
+}
+
+.diff:hover{
+    transform: scale(1.5);
 }
 
 .submit{
+    font-family: 'Pusab';
     color: white;
     font-size: 5vh;
     background-color: maroon;
     border: 3px solid red;
     border-radius: 10px;
     padding: 8px;
+    transition: border 0.1s, background-color 0.1s;
 }
 
 .submit:hover{
@@ -157,6 +191,7 @@ body{
     position: fixed;
     color: #ddd;
     background-color: rgba(50,50,50,0.95);
+    background: linear-gradient(45deg, rgba(25,25,25,0.95), rgba(75,75,75,0.95));
     overflow-y: auto;
     border-radius: 25px;
     z-index: 10;
@@ -191,11 +226,44 @@ body{
 }
 
 .selectrounds{
+    font-size: 2vmin;
     width: 15%;
     border: 1px solid gray;
     border-radius: 20px;
     text-align: center;
     box-shadow: 5px 5px 25px rgba(0,0,0,0.2);
+}
+
+@property --tCol1 {
+    syntax: '<color>';
+    initial-value: yellow;
+    inherits: false;
+}
+
+@property --tCol2 {
+    syntax: '<color>';
+    initial-value: lightgoldenrodyellow;
+    inherits: false;
+}
+
+.bestscores{
+    cursor:pointer;
+    margin-top: 10vh;
+    height: 5vmin;
+    width: 15vmin;
+    background-color: yellow;
+    background: linear-gradient(90deg, var(--tCol1), var(--tCol2));
+    border-width: 0.15vw;
+    border-radius: 5px;
+    font-size: 1.5vmin;
+    transition: transform 0.5s, --tCol1 1s, --tCol2 1s;
+}
+
+.bestscores:hover{
+    --tCol1: lightgoldenrodyellow;
+    --tCol2: yellow;
+    /* background: linear-gradient(45deg, lightgoldenrodyellow, yellow); */
+    transform: scale(1.1);
 }
 
 .blockrectangle{
@@ -204,4 +272,12 @@ body{
     height: 75px;
     width: 90vmin;
     z-index: 2;
+}
+
+a{
+    transition: filter 0.3s;
+}
+
+a:hover{
+    filter: brightness(1.5)
 }
