@@ -18,19 +18,19 @@ The points you gain are split up in a Difficulty section, and a Skillset section
 
 ### AREDL
 
-Difficulty: $ 1250 - (guess^{\frac{5}{6}}-actual^{\frac{5}{6}})^{2} $
+Difficulty: ![equation](https://latex.codecogs.com/svg.image?1250%20-%20(guess%5E%7B%5Cfrac%7B5%7D%7B6%7D%7D-actual%5E%7B%5Cfrac%7B5%7D%7B6%7D%7D)%5E%7B2%7D)
 
-Skillsets: $ \frac{correct}{total} \cdot 3750$
+Skillsets: ![equation](https://latex.codecogs.com/svg.image?%5Cfrac%7Bcorrect%7D%7Btotal%7D%20%5Ccdot%203750)
 
-Multiplier: $ 0.9^{wrong} $
+Multiplier: ![equation](https://latex.codecogs.com/svg.image?0.9%5E%7Bwrong%7D)
 
 ### GDDL
 
-Difficulty: $ \sqrt{49-3(guess-actual)^{2}} \cdot \frac{1250}{7} $
+Difficulty: ![equation](https://latex.codecogs.com/svg.image?%5Csqrt%7B49-3(guess-actual)%5E%7B2%7D%7D%20%5Ccdot%20%5Cfrac%7B1250%7D%7B7%7D)
 
-Skillsets*: $ \frac{totalVotesOfRelevantGuesses}{totalVotesOfRelevantSkillsets} \cdot 3750 $
+Skillsets*: ![equation](https://latex.codecogs.com/svg.image?%5Cfrac%7BtotalVotesOfRelevantGuesses%7D%7BtotalVotesOfRelevantSkillsets%7D%20%5Ccdot%203750)
 
-Multiplier*: $ 0.9^{wrong} \cdot 0.95^{irrelevant} $
+Multiplier*: ![equation](https://latex.codecogs.com/svg.image?0.9%5E%7Bwrong%7D%20%5Ccdot%200.95%5E%7Birrelevant%7D)
 
 \* <sub>GDDL skillset guesses are split into 4 categories, always being categorized into the lowest one that applies:
 - relevant (The main skillsets)

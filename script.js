@@ -53,6 +53,24 @@ async function fetchGDDLLevels(){
     }
     let levelList = await response.json();
     let filteredLevels = levelList["levels"].filter(level => level["Showcase"])
+    filteredLevels = filteredLevels.filter(level => !blacklist.includes(level["ID"]))
+    let levelsToFilter = [];
+    for(let n in filteredLevels){
+        let fn = filteredLevels[n] //i have no clue what to name these variables dude
+        if(fn["SubmissionCount"]<10){
+            let response2 = await fetch('https://skillsetguessr.rubypiec.workers.dev/?site=gddl&url='+encodeURIComponent('level/')+fn["ID"]+encodeURIComponent('/tags'));
+            let skillsetcheck = await response2.json()
+            if(skillsetcheck.length==0){
+                console.log('nuh uh')
+                levelsToFilter.push(Number(n))
+            }
+        }
+    }
+    for(let p=filteredLevels.length-1; p>=0; p--){
+        if(levelsToFilter.includes(Number(p))){
+            filteredLevels.splice(p, 1)
+        }
+    }
     if(filteredLevels.length == 0){
         return await fetchGDDLLevels()
     } else{
@@ -78,13 +96,15 @@ async function fetchAREDLLevels(){
 
 
 let maxRound = Number(document.getElementById('roundamount').value); // THIS IS **NOT** BEING INDEXED AT 0. THIS IS JUST THE AMOUNT OF ROUNDS THERE ARE.
+let endless = false
 
 function applyMaxRound(){
     maxRound = Number(document.getElementById('roundamount').value)
     pointsperRound = Array(maxRound)
     skillsetsPerLevel = Array(maxRound)
     skillsetGuessesPerRound = Array(maxRound)
-    aredlLevelDataPer = Array(maxRound);
+    aredlLevelDataPer = Array(maxRound)
+    diffPredictionsPerRound = Array(maxRound)
 }
 
 let currentRound = 0;
@@ -106,6 +126,10 @@ let addedgame = false;
 
 let aredlLevelDataPer = Array(maxRound);
 async function getRound(roundnum){ // WE ARE INDEXING AT **0**. ZERO IS THE FIRST ROUND. PLEASE DO NOT FORGET THIS.
+    let pointsNeededThisRound = Math.round(4950-4950/(1.0102**(roundnum+1)))
+    if(endless){
+        document.getElementById('pointsneeded').innerHTML = 'Points needed this round: ' + pointsNeededThisRound
+    }
     if(roundnum+1>maxRound){
         if(!addedgame){
             knownGames.push([levelList, gamemode, pointsperRound, skillsetGuessesPerRound, skillsetsPerLevel, diffPredictionsPerRound, aredlLevelDataPer, totalpoints])
@@ -118,6 +142,11 @@ async function getRound(roundnum){ // WE ARE INDEXING AT **0**. ZERO IS THE FIRS
         openRecap(roundnum)
         return;
     }
+    if(!endless){
+        document.getElementById('roundnum').innerHTML = `Round ${roundnum+1}/${maxRound}`
+    } else{
+        document.getElementById('roundnum').innerHTML = `Round ${roundnum+1}`
+    }
     document.getElementById('gameover').classList.add('hidden')
     document.getElementById('roundover').classList.remove('hidden')
     if(gamemode == 'gddl'){
@@ -126,7 +155,13 @@ async function getRound(roundnum){ // WE ARE INDEXING AT **0**. ZERO IS THE FIRS
             levelList = levelList.concat(newBatch)
         }
     }
-    console.log(levelList[roundnum])
+    if(gamemode == 'aredl'){
+        if(roundnum>levelList.length-1){
+            let newBatch = await fetchAREDLLevels()
+            levelList = levelList.concat(newBatch)
+        }
+    }
+    // console.log(levelList[roundnum]) lmao i dont just wanna log the answer to console
     let showcaseUrl;
     if(gamemode == 'gddl'){
         showcaseUrl = levelList[roundnum]["Showcase"]
@@ -139,10 +174,21 @@ async function getRound(roundnum){ // WE ARE INDEXING AT **0**. ZERO IS THE FIRS
 }
 
 async function startGame(){
+    if(maxRound>1500){
+        document.getElementById('pointsneeded').classList.remove('hidden')
+        document.getElementById('recappointsneeded').classList.remove('hidden')
+        endless = true
+    }
     currentRound = 0;
     levelList = [];
     pointsperRound = Array(maxRound)
     totalpoints = 0;
+
+    if(!endless){
+        document.getElementById('roundnum').innerHTML = `Round 1/${maxRound}`
+    } else{
+        document.getElementById('roundnum').innerHTML = 'Round 1'
+    }
 
     document.body.style.overflowY = 'auto'
     document.getElementById('game').classList.remove('hidden')
@@ -239,7 +285,7 @@ async function calculateGDDLPoints(roundNum, diffGuess, skillsetGuess){
     console.log(relevantSkillsets)
 
     let totalRelevantVotes = 0;
-    for(let i of relevantSkillsets){ // This is so poorly coded LMAOOo // i barely fucking know what i was doing tbh
+    for(let i of relevantSkillsets){ // This is so poorly coded LMAOOo // i barely know what i was doing tbh
         totalRelevantVotes+=i.ReactCount
     }
 
@@ -301,6 +347,7 @@ async function calculateAREDLPoints(roundNum, diffGuess, skillsetGuess){
 let skillsetGuessesPerRound = Array(maxRound)
 
 async function skipround(){ //alias: refreshvideo (because i keep LOSING where I PUT THIS FUNCTION)
+    document.getElementById('error').classList.add('hidden')
     levelList.splice(currentRound,1)
     await getRound(currentRound)
 }
@@ -326,7 +373,6 @@ async function openRecap(roundnumber){
         document.getElementById('gameover').classList.remove('hidden')
         document.getElementById('roundover').classList.add('hidden')
         document.getElementById('recap').classList.remove('hidden')
-        console.log('game beaten :3')
 
         return;
     }
@@ -344,6 +390,7 @@ async function openRecap(roundnumber){
         maxSkillset = skillsetsPerLevel[roundnumber][0].ReactCount
     } catch(err){
         console.error(err)
+        console.error(levelList[currentRound])
         document.getElementById('error').classList.remove('hidden')
     }
     for(let i of skillsetsPerLevel[roundnumber]){
@@ -439,6 +486,7 @@ document.getElementById('nextround').addEventListener('click', async function(){
 let diffPredictionsPerRound = Array(5)
 
 async function submitguess(){
+    document.getElementById('submitguess').disabled = true
     document.getElementById('ytvid').src=''
     let points;
     if(gamemode=='gddl'){
@@ -456,6 +504,21 @@ async function submitguess(){
     pointsperRound[currentRound] = points
     totalpoints += points
 
+    if(endless){
+        let pointsNeededThisRound = Math.round(4950-4950/(1.0102**(currentRound+1)))
+        document.getElementById('recappointsneeded').innerHTML = 'Needed: ' + String(pointsNeededThisRound)
+        document.getElementById('recappointsneeded').style.color = 'lime'
+        if(pointsperRound[currentRound]<pointsNeededThisRound){
+            document.getElementById('recappointsneeded').style.color = 'red'
+            maxRound = currentRound+1
+            pointsperRound = pointsperRound.slice(0,maxRound)
+            skillsetsPerLevel = skillsetsPerLevel.slice(0,maxRound)
+            skillsetGuessesPerRound = skillsetGuessesPerRound.slice(0,maxRound)
+            aredlLevelDataPer = aredlLevelDataPer.slice(0,maxRound)
+            diffPredictionsPerRound = diffPredictionsPerRound.slice(0, maxRound)
+        }
+    }
+
     if(gamemode=='gddl'){
         diffPredictionsPerRound[currentRound] = document.getElementById('diffrange').value
     }
@@ -464,6 +527,10 @@ async function submitguess(){
     }
 
     document.getElementById('pointcount').innerHTML = `${Math.round(totalpoints)} points`
+
+    setTimeout(function(){
+        document.getElementById('submitguess').disabled = false
+    }, 10000)
     openRecap(currentRound)
 }
 
@@ -480,8 +547,16 @@ document.getElementById('bestscorebutton').addEventListener('click', function(){
     document.getElementById('bestgames').innerHTML = ''
     for(let k in sortedGames){
         if(k!=0){
+            let unhovertext = `${Number(k)+1}. ${sortedGames[k][2].length} rounds | ${sortedGames[k][1]} | ${Math.round(sortedGames[k][7])}/${5000*sortedGames[k][2].length} points`
+            let hovertext = `${Number(k)+1}. ${sortedGames[k][2].length} rounds | ${sortedGames[k][1]} | ${Math.round(sortedGames[k][7]/sortedGames[k][2].length)} points/round`
             let game = document.getElementById('topgame').cloneNode(true)
-            game.children[0].innerHTML = `${Number(k)+1}. ${sortedGames[k][2].length} rounds | ${sortedGames[k][1]} | ${Math.round(sortedGames[k][7])}/${5000*sortedGames[k][2].length} points`
+            game.children[0].innerHTML = unhovertext
+            game.children[0].addEventListener('mouseenter', function(){
+                game.children[0].innerHTML = hovertext
+            })
+            game.children[0].addEventListener('mouseleave', function(){
+                game.children[0].innerHTML = unhovertext
+            })
             game.children[1].addEventListener('click', async function(){
                 await loadGame(sortedGames[k])
             })
@@ -489,7 +564,15 @@ document.getElementById('bestscorebutton').addEventListener('click', function(){
             document.getElementById('bestgames').appendChild(game)
         }
     }
-    document.getElementById('topgame').children[0].innerHTML = `1. ${sortedGames[0][2].length} rounds | ${sortedGames[0][1]} | ${Math.round(sortedGames[0][7])}/${5000*sortedGames[0][2].length} points`
+    let unhovertext = `1. ${sortedGames[0][2].length} rounds | ${sortedGames[0][1]} | ${Math.round(sortedGames[0][7])}/${5000*sortedGames[0][2].length} points`
+    let hovertext = `1. ${sortedGames[0][2].length} rounds | ${sortedGames[0][1]} | ${Math.round(sortedGames[0][7]/sortedGames[0][2].length)} points/round`
+    document.getElementById('topgame').children[0].innerHTML = unhovertext
+    document.getElementById('topgame').children[0].addEventListener('mouseenter', function(){
+        document.getElementById('topgame').children[0].innerHTML = hovertext
+    })
+    document.getElementById('topgame').children[0].addEventListener('mouseleave', function(){
+        document.getElementById('topgame').children[0].innerHTML = unhovertext
+    })
     document.getElementById('topgame').children[1].addEventListener('click', async function(){
         await loadGame(sortedGames[0])
     })

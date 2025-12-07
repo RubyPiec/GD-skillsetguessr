@@ -14,7 +14,6 @@ body{
 }
 
 
-
 .gmselscreen{
     position: absolute;
     left: 50%;
@@ -173,12 +172,21 @@ body{
     border: 3px solid red;
     border-radius: 10px;
     padding: 8px;
-    transition: border 0.1s, background-color 0.1s;
+    transition: border 0.1s, background-color 0.1s, box-shadow 0.2s;
+    box-shadow: 5px 5px 10px black;
 }
 
-.submit:hover{
+.submit:disabled{
+    cursor: wait;
+    color: lightgray;
+    background-color: darkgray;
+    border-color: black;
+}
+
+.submit:hover:enabled{
     background-color: red;
-    border: 3px solid orange
+    border: 3px solid orange;
+    box-shadow: 2px 2px 4px black;
 }
 
 .recap{
@@ -246,6 +254,36 @@ body{
     inherits: false;
 }
 
+.mainmenu{
+    background-color: cyan;
+    border: 0.3vw solid green;
+    border-radius: 1vw;
+
+    transition: transform 1s;
+}
+
+.mainmenu:hover{
+    transform: scale(1.15);
+}
+
+.cleardata:hover{
+    animation: shake 0.3s linear infinite;
+}
+
+@keyframes shake{
+    0% {transform: translate(1px, 1px)}
+    10% {transform: translate(-1px, -3px)}
+    20% {transform: translate(0px, 2px)}
+    30% {transform: translate(-2px, 1px)}
+    40% {transform: translate(3px, 0px)}
+    50% {transform: translate(2px, -1px)}
+    60% {transform: translate(-1px, 3px)}
+    70% {transform: translate(0px, 0px)}
+    80% {transform: translate(-2px, 2px)}
+    90% {transform: translate(2px, 1px)}
+    100% {transform: translate(1px, -2px)}
+}
+
 .bestscores{
     cursor:pointer;
     margin-top: 10vh;
@@ -275,9 +313,14 @@ body{
 }
 
 a{
-    transition: filter 0.3s;
+    transition: filter 0.3s, transform 0.3s;
 }
 
 a:hover{
-    filter: brightness(1.5)
+    filter: brightness(1.5);
+    transform: scale(1.1)
+}
+
+.notloading{
+    color: orangered;
 }

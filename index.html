@@ -22,6 +22,7 @@
                 <option value="15">15 rounds</option>
                 <option value="20">20 rounds</option>
                 <option value="25">25 rounds</option>
+                <option value="9384">Endless</option>
             </select>
             <div class="gamemodeselect">
                 <div class="gamemode" style="background-image: url(assets/logo_aredl.png)" id="aredlbutton">
@@ -57,17 +58,20 @@
                 
             </div>
             <br><br><br><br>
-            <button style="font-size: 100%;" onclick="window.location.reload()">Go to main menu</button>
+            <button class="mainmenu" style="font-size: 100%;" onclick="window.location.reload()">Go to main menu</button>
             <br><br>
-            <button style="color:red;" onclick="if(confirm('ARE YOU SURE YOU WANT TO ERASE ALL DATA? THIS CHANGE IS IRREVERTIBLE.')){localStorage.clear();window.location.reload()}">CLEAR ALL DATA</button>
+            <button style="color:red;" class="cleardata" id="cleardata" onclick="if(confirm('ARE YOU SURE YOU WANT TO ERASE ALL DATA? THIS CHANGE IS IRREVERTIBLE.')){localStorage.clear();window.location.reload()}">CLEAR ALL DATA</button>
         </div>
         <div class="game hidden" id="game">
-            <h1 class="hidden" id="error" style="color: red; background-color: black;">WHOOPS LOL SEEMS LIKE THIS LEVEL CRASHES THE WEBSITE. SORRY ABOUT THAT. <a href="https://forms.gle/piSmuF3QtaHtuYMV7">CLICK HERE TO REPORT</a></h1>
+            <h1 class="hidden" id="error" style="color: red; background-color: black;">WHOOPS LOL SEEMS LIKE THIS LEVEL CRASHES THE WEBSITE. SORRY ABOUT THAT.<a href="https://forms.gle/piSmuF3QtaHtuYMV7">CLICK HERE TO REPORT</a>, just hit "Video unavailable" to continue on</h1>
+            <h6 id="roundnum">Round 1/5</h6>
+            <h5 id="pointsneeded" class="hidden">Points needed this round: 50</h5>
             <h3 id="pointcount">0 points</h3>
             <div class="blockrectangle"></div>
             <iframe class="ytvid" id="ytvid" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share">
             </iframe>
             <br><button class="notloading" id="unavailable">Video unavailable?</button><br>
+            <br>
             <h1>Skillsets:</h1>
                 <select id="skillsets" class="skillsetsel" placeholder="Choose a skillset..." multiple>
                 </select>
@@ -78,11 +82,11 @@
                         <input class="difficultyrange" id="diffrange" type="range" min="1" max="39" value="1"><span class="diff" id="difficulty"> tier 1</span>
                     </div>
                     <div class="difficulties">
-                        <img src="assets/demon_easy.png" class="difficulty selected">
-                        <img src="assets/demon_medium.png" class="difficulty">
-                        <img src="assets/demon_hard.png" class="difficulty">
-                        <img src="assets/demon_insane.png" class="difficulty">
-                        <img src="assets/demon_extreme.png" class="difficulty">
+                        <img src="assets/demon_easy.png" class="difficulty selected" draggable="false">
+                        <img src="assets/demon_medium.png" class="difficulty" draggable="false">
+                        <img src="assets/demon_hard.png" class="difficulty" draggable="false">
+                        <img src="assets/demon_insane.png" class="difficulty" draggable="false">
+                        <img src="assets/demon_extreme.png" class="difficulty" draggable="false">
                     </div>
                 </div>
                 <div id="aredldiffsel" style="display: none;">
@@ -96,6 +100,7 @@
         <div class="recap hidden" id="recap">
             <div class="hidden" id="roundover">
                 <h4 style="margin: 5px; color: white;" id="recappoints">3 points</h4>
+                <h5 style="color: red;" id="recappointsneeded" class="hidden">Needed: 10</h5>
                 <h1 style="margin-top: 0; color: white;">You just saw:</h1>
                     <a href="https://gdladder.com/level/58825144" id="levelName" style="color: #ccc" id="level">xo by KrmaL</a> <span id="actualdifficulty">(t30)</span>
                     <p style="font-size: 50%;" id="diffprediction">You thought: t10</p>
@@ -124,7 +129,7 @@
                 <br><br><br>
                 <button id="closewindow" style="font-size: 100%;" class="hidden" onclick="document.getElementById('recap').classList.add('hidden')">Close this window</button>
                 <br><br>
-                <button onclick="window.location.reload()">Go to main menu</button>
+                <button class="mainmenu" onclick="window.location.reload()">Go to main menu</button>
             </div>
         </div>
         <script src="script.js"></script>
